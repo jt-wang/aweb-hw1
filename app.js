@@ -85,7 +85,9 @@ io.on('connection', function(socket) {
 
   socket.on('logout', function() {
     console.log(socket.current_username + ' logout')
+    console.log('socket.current_username: ' + socket.current_username)
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
+    console.log('reach here')
     if (index !== -1) {
       contacts.splice(index, 1)
       io.emit('update_contacts', contacts)
