@@ -78,7 +78,7 @@ io.on('connection', function(socket) {
       console.log(socket.current_username + ' disconnected')
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
     if (index !== -1) {
-      contacts[index].online = false
+      contacts.splice(index, 1)
       // socket.emit('update_contacts', _.filter(_.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}), (p) => {return p.name !== data.username}))
       socket.broadcast.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     }
@@ -89,11 +89,10 @@ io.on('connection', function(socket) {
 
   socket.on('logout', function() {
     console.log(socket.current_username + ' logout')
-    console.log('socket.current_username: ' + socket.current_username)
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
     if (index !== -1) {
-      // contacts.splice(index, 1)
-      contacts[index].online = false
+      contacts.splice(index, 1)
+      // contacts[index].online = false
       // socket.emit('update_contacts', _.filter(_.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}), (p) => {return p.name !== data.username}))
       socket.broadcast.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     }
@@ -101,29 +100,19 @@ io.on('connection', function(socket) {
 
   socket.on('login', function(data) {
     let index = _.findIndex(contacts, (o) => {return o.name === data.username})
+    console.log(data.username + ' login')
     if (index === -1) {
-      console.log(data.username + ' register')
       socket.current_username = data.username
-      let sample = _.sample(robots)
-      contacts.push({socket: socket, name: data.username, password: data.password, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true})
       socket.emit('login_success')
-      socket.emit('update_contacts', _.filter(_.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}), (p) => {return p.name !== data.username}))
+      socket.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
+      let sample = _.sample(robots)
+      contacts.push({socket: socket, name: data.username, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true})
+      // socket.emit('update_contacts', _.filter(_.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}), (p) => {return p.name !== data.username}))
       socket.broadcast.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     } else {
-      console.log(data.username + ' login')
-      if (contacts[index].password === data.password) {
-        socket.current_username = data.username
-      contacts[index].socket = socket
-      contacts[index].online = true
-        socket.emit('login_success')
-        socket.emit('update_contacts', _.filter(_.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}), (p) => {return p.name !== data.username}))
-        socket.broadcast.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
-      } else {
-        console.log(data.username + ' wrong password')
-        socket.emit('login_failure')
-      }
+      console.log(data.username + ' already taken')
+      socket.emit('login_failure')
     }
-
 
   })
 
@@ -132,14 +121,12 @@ io.on('connection', function(socket) {
     let receiver = message.receiver
     let index = _.findIndex(contacts, (o) => {return o.name === receiver})
     if (index !== -1) {
-      if (contacts[index].online) {
             // let random_message_content = _.sample(preset_messages)
     // let message_time = moment().calendar()
     // let server_message = {sender: sender, receiver: message.sender, content: message.content, time: message_time}
     // socket.emit('server_message', message)
-    
         contacts[index].socket.emit('server_message', message)
-      }
+
     }
 
 
