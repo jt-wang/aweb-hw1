@@ -98,7 +98,7 @@ io.on('connection', function(socket) {
   })
 
   socket.on('login', function(data) {
-    let index = _.findIndex(contacts, (o) => {return o.name === data.username && o.password === data.password})
+    let index = _.findIndex(contacts, (o) => {return o.name === data.username})
     socket.current_username = data.username
     if (index === -1) {
       console.log(data.username + ' register')
@@ -106,12 +106,18 @@ io.on('connection', function(socket) {
       contacts.push({socket: socket, name: data.username, password: data.password, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true})
     } else {
       console.log(data.username + ' login')
+      if (contacts[index].password === data.password) {
       contacts[index].socket = socket
       contacts[index].online = true
+        socket.emit('login_success')
+        io.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
+      } else {
+        console.log(data.username + ' wrong password')
+        socket.emit('login_failure')
+      }
     }
 
-    socket.emit('login_success')
-    io.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
+
   })
 
   socket.on('client_message', function(message) {
