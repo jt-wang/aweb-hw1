@@ -99,9 +99,9 @@ io.on('connection', function(socket) {
 
   socket.on('login', function(data) {
     let index = _.findIndex(contacts, (o) => {return o.name === data.username})
-    socket.current_username = data.username
     if (index === -1) {
       console.log(data.username + ' register')
+      socket.current_username = data.username
       let sample = _.sample(robots)
       contacts.push({socket: socket, name: data.username, password: data.password, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true})
       socket.emit('login_success')
@@ -109,6 +109,7 @@ io.on('connection', function(socket) {
     } else {
       console.log(data.username + ' login')
       if (contacts[index].password === data.password) {
+        socket.current_username = data.username
       contacts[index].socket = socket
       contacts[index].online = true
         socket.emit('login_success')
