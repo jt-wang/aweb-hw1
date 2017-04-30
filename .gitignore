@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+.npmrc
+.idea/
+old_Dockerfile
+npm-debug.log
