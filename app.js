@@ -77,8 +77,8 @@ io.on('connection', function(socket) {
     if (_.has(socket, 'current_username')){
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
     if (index !== -1) {
-      contacts.splice(index, 1)
-      io.emit('update_contacts', contacts)
+      contacts[index].online = false
+      io.emit('update_contacts',  _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     }
     }
   })
@@ -89,18 +89,19 @@ io.on('connection', function(socket) {
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
     console.log('reach here')
     if (index !== -1) {
-      contacts.splice(index, 1)
-      io.emit('update_contacts', contacts)
+      // contacts.splice(index, 1)
+      contacts[index].online = false
+      io.emit('update_contacts',  _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     }
   })
 
   socket.on('login', function(data) {
     console.log(data.username + ' login')
-    let index = _.findIndex(contacts, (o) => {return o.name === data.username})
+    let index = _.findIndex(contacts, (o) => {return o.name === data.username && o.password === data.password})
     socket.current_username = data.username
     if (index === -1) {
       let sample = _.sample(robots)
-      contacts.push({socket: socket, name: data.username, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true}) 
+      contacts.push({socket: socket, name: data.username, password: data.password, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true})
     } else {
       contacts[index].socket = socket
       contacts[index].online = true
