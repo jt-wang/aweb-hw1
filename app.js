@@ -73,13 +73,16 @@ let robots = [{
 io.on('connection', function(socket) {
   console.log('a user connected')
   socket.on('disconnect', function() {
-    console.log('user disconnected')
+
     if (_.has(socket, 'current_username')){
+      console.log(socket.current_username + ' disconnected')
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
     if (index !== -1) {
       contacts[index].online = false
       io.emit('update_contacts',  _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     }
+    } else {
+      console.log('user disconnected')
     }
   })
 
@@ -87,7 +90,6 @@ io.on('connection', function(socket) {
     console.log(socket.current_username + ' logout')
     console.log('socket.current_username: ' + socket.current_username)
     let index = _.findIndex(contacts, (o) => {return o.name === socket.current_username})
-    console.log('reach here')
     if (index !== -1) {
       // contacts.splice(index, 1)
       contacts[index].online = false
