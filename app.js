@@ -104,6 +104,8 @@ io.on('connection', function(socket) {
       console.log(data.username + ' register')
       let sample = _.sample(robots)
       contacts.push({socket: socket, name: data.username, password: data.password, avatar_chat: sample.avatar_chat, avatar_contact: sample.avatar_contact, online: true})
+      socket.emit('login_success')
+      io.emit('update_contacts', _.map(contacts, (o) => {return _.pick(o, ['name', 'avatar_chat', 'avatar_contact', 'online'])}))
     } else {
       console.log(data.username + ' login')
       if (contacts[index].password === data.password) {
